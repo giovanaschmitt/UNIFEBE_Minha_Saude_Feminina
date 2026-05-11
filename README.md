@@ -1,7 +1,7 @@
 # MINHA SAUDE FEMININA - UNIFEBE
 Um aplicativo pensado para cuidar da mulher em todas as fases da vida.
 
-Uma parceria entre Medicina e Sistemas de Informação.
+Uma parceria entre os cursos de Medicina e Sistemas de Informação.
 
 O Minha Saúde Feminina nasce como uma forma de estar presente no cotidiano da mulher
 * Um aplicativo gratuito
