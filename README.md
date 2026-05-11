@@ -3,7 +3,7 @@ Um aplicativo pensado para cuidar da mulher em todas as fases da vida.
 Uma parceria entre os cursos de Medicina e Sistemas de Informação.
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------
-Autores: Alexandre Santos Diniz, Felipe Derengoski Fernandes Giovana Schmitt, Gustavo Da Silva Cavalheiro Nogueira, Taison Pedrini e Vinícius Mayer Rover.
+Autores: Alexandre Santos Diniz, Felipe Derengoski Fernandes, Giovana Schmitt, Gustavo Da Silva Cavalheiro Nogueira, Taison Pedrini e Vinícius Mayer Rover.
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------
 
