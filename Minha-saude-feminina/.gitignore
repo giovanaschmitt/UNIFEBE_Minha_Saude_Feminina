@@ -1,0 +1,49 @@
+# Segredos
+.env
+.env.local
+*.env.local
+serviceAccountKey.json
+firebase-credentials.json
+
+# Editores
+.idea/
+.vscode/
+*.iml
+*.swp
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# ============== Flutter ==============
+frontend/mobile/.dart_tool/
+frontend/mobile/.flutter-plugins
+frontend/mobile/.flutter-plugins-dependencies
+frontend/mobile/.packages
+frontend/mobile/build/
+frontend/mobile/ios/Pods/
+frontend/mobile/ios/Flutter/Flutter.framework
+frontend/mobile/ios/Flutter/Flutter.podspec
+frontend/mobile/android/.gradle/
+frontend/mobile/android/local.properties
+frontend/mobile/android/key.properties
+frontend/mobile/coverage/
+pubspec.lock
+
+# ============== Java / Spring Boot ==============
+backend/api/target/
+backend/api/.gradle/
+backend/api/build/
+backend/api/out/
+backend/api/HELP.md
+backend/api/.mvn/
+
+# ============== Admin Web ==============
+admin/web/node_modules/
+admin/web/dist/
+
+# ============== Infra ==============
+infrastructure/oracle/data/
+infrastructure/redis/data/
+docker-volumes/

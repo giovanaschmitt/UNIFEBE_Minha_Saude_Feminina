@@ -1,0 +1,17 @@
+# Placeholder — configuração da API Spring Boot.
+# Conforme seção 4 do PDF: Oracle 19c + Redis + Firebase + Flyway + OpenAPI.
+# Valores serão preenchidos na Sprint 2.
+
+# spring:
+#   application:
+#     name: minha-saude-feminina-api
+#   datasource:    # Oracle
+#   jpa:           # Hibernate
+#   flyway:        # migrations
+#   data.redis:    # cache
+# firebase:
+#   project-id:
+#   credentials-path:
+# server:
+#   port: 8080
+#   servlet.context-path: /api
