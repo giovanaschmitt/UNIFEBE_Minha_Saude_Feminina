@@ -1,4 +1,4 @@
-# MINHA SAUDE FEMININA
+# MINHA SAÚDE FEMININA
 > Um aplicativo pensado para cuidar da mulher em todas as fases da vida.
 Uma parceria entre os cursos de Medicina e Sistemas de Informação.
 <br></br>
