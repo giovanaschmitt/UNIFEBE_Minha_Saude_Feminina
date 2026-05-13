@@ -60,22 +60,35 @@ Uma parceria entre os cursos de Medicina e Sistemas de Informação.
    - NoSQL / In-Memory (Cache): Redis.
 <br></br>
 
-## 4. 📁 ESTRUTURA DE PASTAS
+## 4. 📁 ESTRUTURA RAIZ
 ```bash
-   /Minha-saude-feminina
+ /Minha-saude-feminina
 │
-├── admin/web/              # Aplicação web para administração do app
+├── admin/web/              
+│   # Aplicação web responsável pelo painel administrativo do sistema,
+│   # permitindo gerenciamento de usuários, conteúdos e informações.
 │
-├── backend/                # API e regras de negócio da aplicação
+├── backend/                
+│   # API e regras de negócio da aplicação, responsável pela comunicação
+│   # com o banco de dados, autenticação e processamento das funcionalidades.
 │
-├── frontend/               # Interface gráfica do sistema
+├── frontend/mobile         
+│   # Aplicação mobile voltada ao usuário final, contendo a interface gráfica,
+│   # funcionalidades de navegação e interação com o sistema.
 │
-├── docs/                   # Documentações, diagramas e arquivos auxiliares
+├── .env.example            
+│   # Arquivo modelo das variáveis de ambiente necessárias para execução
+│   # do projeto, sem expor dados sensíveis.
 │
-├── database/               # Scripts e configurações do banco de dados
+├── .gitignore              
+│   # Arquivo utilizado pelo Git para definir quais arquivos e diretórios
+│   # não devem ser enviados ao repositório.
 │
-├── assets/                 # Imagens, ícones e arquivos estáticos
+├── docker-compose.yml      
+│   # Arquivo de configuração do Docker Compose utilizado para definir
+│   # e executar múltiplos containers da aplicação de forma automatizada.
 │
-├── README.md               # Documentação principal do projeto
-│
-└── package.json            # Dependências e configurações do projeto
+└── README.md               
+    # Documentação principal do projeto contendo instruções,
+    # tecnologias utilizadas e informações gerais do sistema.
+```
