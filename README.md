@@ -7,14 +7,15 @@ Autores: Alexandre Santos Diniz, Felipe Derengoski Fernandes, Giovana Schmitt, G
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-1. OBJETIVO
+1. 🎯 OBJETIVO
    
    O objetivo do aplicativo é promover o acesso à informação e ao acompanhamento da saúde da mulher por meio de uma solução tecnológica acessível, oferecendo conteúdos educativos, orientações preventivas e ferramentas de monitoramento de sinais e sintomas.
    
     Destacamos que a aplicação não se trata de um substituto ao atendimento profissional em saúde, mas como um recurso complementar, com objetivo de auxiliar o usuário no reconhecimento de sinais de alerta, no acompanhamento de sua saúde e incentivando a busca por atendimento qualificado junto à UBS (Unidade Básica de Saúde).
 
-3. FUNCIONALIDADES
-4. TECNOLOGIAS ESCOLHIDAS
+2. 📲 TELAS
+   
+3. 💻 TECNOLOGIAS ESCOLHIDAS <style: font-color: red>
    
    3.1 Camada de Cliente (Front-end Mobile)
     - Framework: Flutter (Google).
@@ -23,11 +24,9 @@ Autores: Alexandre Santos Diniz, Felipe Derengoski Fernandes, Giovana Schmitt, G
     - Comunicação: Cliente HTTP consumindo API REST via JSON.
     - Persistência Local (Cache): Hive (para dados básicos offline).
 
-
-   3.2 Segmento Administrativo (Web)
+   3.2 Segmento Administrativo (Web) <br>
     - Interface Web: Desenvolvida com HTML5, CSS3 e JavaScript, utilizando como base principal para o desenvolvimento web o framework Bootstrap 5.
     - Persistência Local (Cache): Local storage.
-
 
    3.3 Camada de Segurança e Identidade (Cloud)
     - Provedor: Firebase (Google Cloud).
@@ -44,29 +43,21 @@ Autores: Alexandre Santos Diniz, Felipe Derengoski Fernandes, Giovana Schmitt, G
 
    3.5 Camada de Dados e Performance (Persistência)
    - RDBMS (Relacional): Oracle Database 19c (19.27c) sem Oracle Grid Infrastructure (GI).
-     + Papel: Armazenamento transacional de ciclos, sintomas e dados sensíveis da LGPD.
    - NoSQL / In-Memory (Cache): Redis.
-     + Papel: Cache de sessões, resultados de consultas pesadas e controle de tráfego (Rate Limit).
 
-   3.6 Infraestrutura e Orquestração
-      - Sistema Operacional Host: Oracle Linux 9.7.
-      - Virtualização: Docker e Docker Compose.
-      - Load Balancer / Reverse Proxy: Nginx (Containerizado).
-      - Estratégia de Escalonamento: 2 instâncias da API Spring Boot em Round Robin.
-  
-    3.6.1 Detalhamento de Hardware (Host Local)
-      - Processador: 4 Núcleos Físicos    
-      - Memória RAM: 8 GB (Física)
-      - Memória SWAP: 8 GB (Virtual)
-      - Armazenamento: 200 GB
-      
-    3.6.2 Distribuição dos recursos do Host Local
-     - Oracle Linux (Host): 1.0 GB / Destinada ao kernel e processos do Docker.
-     - Oracle 19c: 3.5 GB / SGA (2.5 Gb) + PGA (1 Gb)
-     - Java Spring Boot (2x Docker): 2.0 GB / 1 GB para cada instância (Xms512m / Xmx1g).
-     - Redis: 256 MB / Destinado a cache de texto
-     - Nginx: 64 MB / Alta densidade de conexões com baixo consumo via Event-Loop. Atuará como Proxy Reverso também para o tráfego Web, diferenciando requisições de API (/api/**) de requisições administrativas (/admin/**)
-     - Margem de  Segurança: ~1.2 GB / Essencial para evitar o uso excessivo de SWAP.
-
-
-5. ESTRUTURA DE PASTAS
+4. 📁 ESTRUTURA DE PASTAS <br>
+     /Minha-saude-feminina <br>
+│
+├── backend/                # API e regras de negócio da aplicação <br>
+│
+├── frontend/               # Interface gráfica do sistema <br>
+│
+├── docs/                   # Documentações, diagramas e arquivos auxiliares <br>
+│
+├── database/               # Scripts e configurações do banco de dados <br>
+│
+├── assets/                 # Imagens, ícones e arquivos estáticos <br>
+│
+├── README.md               # Documentação principal do projeto <br>
+│
+└── package.json            # Dependências e configurações do projeto <br>
