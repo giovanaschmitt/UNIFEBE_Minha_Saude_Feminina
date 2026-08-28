@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Artigo · Minha Saúde Feminina</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link href="assets/vendor/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/quill.snow.css" rel="stylesheet">
+  <link href="assets/fontes/fontes.css" rel="stylesheet">
+  <link href="assets/css/estilo.css" rel="stylesheet">
+</head>
+<body>
+
+<header class="topo" id="cabecalho"></header>
+
+<main class="container py-4">
+  <div id="faixaModo" class="mb-3"></div>
+  <div id="avisos"></div>
+
+  <form id="formArtigo">
+    <div class="d-flex align-items-end justify-content-between flex-wrap gap-3 mb-4">
+      <div>
+        <h1 class="fs-3 mb-1" id="tituloTela">Novo artigo</h1>
+        <p class="ajuda mb-0">Texto, imagens e vídeos no mesmo conteúdo. A pré-visualização mostra como fica no aplicativo.</p>
+      </div>
+      <div class="d-flex gap-2">
+        <a class="btn btn-contorno" href="index.html">Cancelar</a>
+        <button class="btn btn-rosa" type="submit" id="botaoSalvar">Salvar artigo</button>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-12 col-xl-8">
+        <div class="cartao p-4 mb-4">
+          <div class="mb-3">
+            <label class="form-label" for="titulo">Título</label>
+            <input class="form-control" id="titulo" maxlength="160" required
+                   placeholder="Ex.: Cólicas menstruais: quando se preocupar">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="resumo">Resumo</label>
+            <input class="form-control" id="resumo" maxlength="300"
+                   placeholder="Uma frase que aparece no cartão do aplicativo">
+            <p class="ajuda mt-1 mb-0">Deixe em branco para gerar a partir do início do texto.</p>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-12 col-md-5">
+              <label class="form-label" for="categoria_id">Categoria</label>
+              <select class="form-select" id="categoria_id" required></select>
+            </div>
+            <div class="col-6 col-md-3">
+              <label class="form-label" for="emoji">Ícone</label>
+              <input class="form-control" id="emoji" maxlength="8" value="💗">
+            </div>
+            <div class="col-6 col-md-4">
+              <label class="form-label" for="tempo_leitura">Tempo de leitura (min)</label>
+              <input class="form-control" id="tempo_leitura" type="number" min="1" max="60" value="3">
+            </div>
+          </div>
+        </div>
+
+        <div class="cartao p-4">
+          <label class="form-label d-block mb-2">Conteúdo</label>
+          <p class="ajuda mb-3">
+            Use a barra para títulos, negrito, itálico, cores, listas e citações. Os botões
+            <strong>imagem</strong> e <strong>vídeo</strong> enviam o arquivo para a API e inserem no ponto do cursor;
+            o de vídeo também aceita link do YouTube ou Vimeo.
+          </p>
+          <div id="editor"></div>
+          <input type="file" id="entradaMidia" accept="image/*,video/mp4,video/webm" hidden>
+          <p class="ajuda mt-2 mb-0" id="statusMidia"></p>
+        </div>
+      </div>
+
+      <div class="col-12 col-xl-4">
+        <div class="cartao p-4 mb-4">
+          <h2 class="fs-6 mb-3">Publicação</h2>
+
+          <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" role="switch" id="publicado" checked>
+            <label class="form-check-label" for="publicado">Disponível no aplicativo</label>
+          </div>
+
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" role="switch" id="destaque">
+            <label class="form-check-label" for="destaque">Fixar no topo da lista</label>
+          </div>
+
+          <label class="form-label" for="autora">Assinatura</label>
+          <input class="form-control mb-3" id="autora" maxlength="120" value="Equipe editorial">
+
+          <label class="form-label" for="capa">Imagem de capa</label>
+          <input class="form-control" id="capa" type="file" accept="image/*">
+          <div id="areaCapa" class="d-none mt-3">
+            <img id="previaCapa" alt="Capa do artigo" class="img-fluid" style="border-radius:14px">
+            <button class="btn btn-contorno btn-sm mt-2" type="button" id="removerCapa">Remover capa</button>
+          </div>
+        </div>
+
+        <div class="cartao p-3">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <h2 class="fs-6 mb-0">Como fica no aplicativo</h2>
+            <span class="ajuda">Atualiza enquanto você escreve</span>
+          </div>
+
+          <div class="moldura-celular mx-auto" style="width:100%;max-width:330px">
+            <div class="tela-celular" style="height:520px">
+              <div class="app-cabecalho"><div class="app-titulo">Conteúdos 💜</div></div>
+              <div class="app-cartao mt-3">
+                <div class="emoji" id="pvEmoji">💗</div>
+                <div>
+                  <div class="rotulo-categoria" id="pvCategoria">CATEGORIA</div>
+                  <h6 id="pvTitulo">Título do artigo</h6>
+                  <p id="pvResumo">O resumo aparece aqui.</p>
+                </div>
+              </div>
+              <div class="app-leitura mt-2" id="pvConteudo"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</main>
+
+<script src="assets/vendor/bootstrap.bundle.min.js"></script>
+<script src="assets/vendor/quill.js"></script>
+<script src="assets/js/config.js"></script>
+<script src="assets/js/api.js"></script>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/comum.js"></script>
+<script src="assets/js/artigo.js"></script>
+</body>
+</html>

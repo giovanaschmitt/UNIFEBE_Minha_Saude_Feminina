@@ -1,0 +1,12 @@
+target/*
+!target/*.jar
+libs/
+maven_local/
+uploads/
+.git/
+.idea/
+.vscode/
+*.md
+src/main/resources/.env
+Dockerfile
+.dockerignore

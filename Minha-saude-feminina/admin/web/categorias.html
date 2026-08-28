@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Categorias · Minha Saúde Feminina</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link href="assets/vendor/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/fontes/fontes.css" rel="stylesheet">
+  <link href="assets/css/estilo.css" rel="stylesheet">
+</head>
+<body>
+
+<header class="topo" id="cabecalho"></header>
+
+<main class="container py-4">
+  <div id="faixaModo" class="mb-3"></div>
+  <div id="avisos"></div>
+
+  <div class="mb-4">
+    <h1 class="fs-3 mb-1">Categorias</h1>
+    <p class="ajuda mb-0">As categorias viram os filtros que aparecem no topo da aba Conteúdos.</p>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-12 col-lg-7">
+      <div class="cartao p-4">
+        <h2 class="fs-6 mb-3">Como aparece no aplicativo</h2>
+        <div class="faixa-chips mb-4" id="previaChips"></div>
+
+        <table class="table align-middle mb-0">
+          <thead>
+            <tr class="ajuda text-uppercase">
+              <th>Categoria</th><th>Ordem</th><th class="text-end">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="corpoTabela"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-5">
+      <form class="cartao p-4" id="formCategoria">
+        <h2 class="fs-6 mb-3">Nova categoria</h2>
+
+        <label class="form-label" for="nome">Nome</label>
+        <input class="form-control mb-3" id="nome" maxlength="60" required placeholder="Ex.: Saúde mental">
+
+        <div class="row g-3 mb-3">
+          <div class="col-4">
+            <label class="form-label" for="emoji">Ícone</label>
+            <input class="form-control" id="emoji" maxlength="8" value="🌸">
+          </div>
+          <div class="col-4">
+            <label class="form-label" for="cor">Cor</label>
+            <input class="form-control form-control-color w-100" id="cor" type="color" value="#B81E4D">
+          </div>
+          <div class="col-4">
+            <label class="form-label" for="ordem">Ordem</label>
+            <input class="form-control" id="ordem" type="number" min="0" value="0">
+          </div>
+        </div>
+
+        <button class="btn btn-rosa w-100" type="submit">Criar categoria</button>
+      </form>
+    </div>
+  </div>
+</main>
+
+<script src="assets/vendor/bootstrap.bundle.min.js"></script>
+<script src="assets/js/config.js"></script>
+<script src="assets/js/api.js"></script>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/comum.js"></script>
+<script src="assets/js/categorias.js"></script>
+</body>
+</html>

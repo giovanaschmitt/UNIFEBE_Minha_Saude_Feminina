@@ -4,6 +4,7 @@
 *.env.local
 serviceAccountKey.json
 firebase-credentials.json
+firebase-service-account.json
 
 # Editores
 .idea/
@@ -38,6 +39,7 @@ backend/api/build/
 backend/api/out/
 backend/api/HELP.md
 backend/api/.mvn/
+backend/api/uploads/
 
 # ============== Admin Web ==============
 admin/web/node_modules/

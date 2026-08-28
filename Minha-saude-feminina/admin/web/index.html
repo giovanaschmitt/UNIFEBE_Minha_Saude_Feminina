@@ -1,14 +1,91 @@
-<!--
-  Placeholder — entrada do painel administrativo.
-  Redirecionará para /pages/login.html (ou /pages/dashboard.html se houver token).
--->
 <!doctype html>
-<html lang="pt-br">
-  <head>
-    <meta charset="utf-8" />
-    <title>Minha Saúde Feminina — Admin (placeholder)</title>
-  </head>
-  <body>
-    <!-- TODO(sprint-2): redirecionar conforme estado de autenticação. -->
-  </body>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Artigos · Minha Saúde Feminina</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link href="assets/vendor/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/fontes/fontes.css" rel="stylesheet">
+  <link href="assets/css/estilo.css" rel="stylesheet">
+</head>
+<body>
+
+<header class="topo" id="cabecalho"></header>
+
+<main class="container py-4">
+  <div id="faixaModo" class="mb-3"></div>
+  <div id="avisos"></div>
+
+  <div class="d-flex align-items-end justify-content-between flex-wrap gap-3 mb-4">
+    <div>
+      <h1 class="fs-3 mb-1">Artigos</h1>
+      <p class="ajuda mb-0">Tudo que é publicado aqui aparece na aba Conteúdos do aplicativo.</p>
+    </div>
+    <a class="btn btn-rosa" href="artigo.html">+ Novo artigo</a>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3"><div class="cartao-metrica"><div class="numero" id="mTotal">—</div><div class="rotulo">Artigos</div></div></div>
+    <div class="col-6 col-lg-3"><div class="cartao-metrica"><div class="numero" id="mPublicados">—</div><div class="rotulo">No aplicativo</div></div></div>
+    <div class="col-6 col-lg-3"><div class="cartao-metrica"><div class="numero" id="mRascunhos">—</div><div class="rotulo">Rascunhos</div></div></div>
+    <div class="col-6 col-lg-3"><div class="cartao-metrica"><div class="numero" id="mCategorias">—</div><div class="rotulo">Categorias</div></div></div>
+  </div>
+
+  <form class="cartao p-3 mb-4" id="formFiltros">
+    <div class="row g-2 align-items-end">
+      <div class="col-12 col-md-5">
+        <label class="form-label" for="busca">Buscar</label>
+        <input class="form-control" id="busca" name="busca" placeholder="Título, resumo ou texto do artigo">
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="form-label" for="categoria_id">Categoria</label>
+        <select class="form-select" id="categoria_id" name="categoria_id"><option value="">Todas</option></select>
+      </div>
+      <div class="col-6 col-md-2">
+        <label class="form-label" for="situacao">Situação</label>
+        <select class="form-select" id="situacao" name="situacao">
+          <option value="">Todas</option>
+          <option value="publicado">Publicado</option>
+          <option value="rascunho">Rascunho</option>
+        </select>
+      </div>
+      <div class="col-12 col-md-2 d-flex gap-2">
+        <button class="btn btn-rosa flex-grow-1" type="submit">Filtrar</button>
+        <button class="btn btn-contorno" type="button" id="botaoLimpar">Limpar</button>
+      </div>
+    </div>
+  </form>
+
+  <div id="listagem">
+    <div class="vazio">Carregando artigos…</div>
+  </div>
+</main>
+
+<div class="modal fade" id="modalExcluir" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius: 20px;">
+      <div class="modal-header border-0">
+        <h2 class="modal-title fs-5">Excluir artigo</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-1">Você vai excluir <strong id="tituloExcluir"></strong>.</p>
+        <p class="ajuda mb-0">O artigo sai do aplicativo na próxima sincronização, inclusive nos celulares que já baixaram o conteúdo.</p>
+      </div>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-contorno" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-perigo" id="confirmarExclusao">Excluir artigo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/vendor/bootstrap.bundle.min.js"></script>
+<script src="assets/js/config.js"></script>
+<script src="assets/js/api.js"></script>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/comum.js"></script>
+<script src="assets/js/painel.js"></script>
+</body>
 </html>

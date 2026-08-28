@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Entrar · Minha Saúde Feminina</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link href="assets/vendor/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/fontes/fontes.css" rel="stylesheet">
+  <link href="assets/css/estilo.css" rel="stylesheet">
+</head>
+<body class="tela-login">
+
+<main class="container py-5">
+  <div class="row justify-content-center align-items-center" style="min-height: 88vh;">
+    <div class="col-12 col-md-7 col-lg-5 col-xl-4">
+
+      <div class="text-center mb-4">
+        <div class="marca fs-3">Minha Saúde Feminina 💜</div>
+        <p class="ajuda mt-1 mb-0">Gestão de conteúdos</p>
+      </div>
+
+      <div id="avisos"></div>
+
+      <form class="cartao p-4" id="formLogin" novalidate>
+        <h1 class="fs-5 mb-1">Entre para gerenciar os artigos</h1>
+        <p class="ajuda mb-4">Use a conta cadastrada para a equipe editorial.</p>
+
+        <div class="mb-3">
+          <label class="form-label" for="email">E-mail</label>
+          <input class="form-control" id="email" type="email" autocomplete="username"
+                 placeholder="seu@email.com.br" required autofocus>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label" for="senha">Senha</label>
+          <div class="campo-senha">
+            <input class="form-control" id="senha" type="password" autocomplete="current-password" 
+              placeholder="Insira sua senha" required>
+            <button class="botao-olho" type="button" id="verSenha" aria-label="Mostrar senha">👁</button>
+          </div>
+        </div>
+
+        <button class="btn btn-rosa w-100" type="submit" id="botaoEntrar">Entrar</button>
+
+        <p class="ajuda text-center mt-3 mb-0" id="dicaModo"></p>
+        
+      </form>
+
+    </div>
+  </div>
+</main>
+
+<script src="assets/vendor/bootstrap.bundle.min.js"></script>
+<script src="assets/js/config.js"></script>
+<script src="assets/js/api.js"></script>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/comum.js"></script>
+<script src="assets/js/login.js"></script>
+</body>
+</html>
