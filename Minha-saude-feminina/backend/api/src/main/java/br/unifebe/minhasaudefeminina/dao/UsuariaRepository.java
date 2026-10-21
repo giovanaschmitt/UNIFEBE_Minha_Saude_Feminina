@@ -8,4 +8,6 @@ import br.unifebe.minhasaudefeminina.model.Usuaria;
 
 public interface UsuariaRepository extends JpaRepository<Usuaria, Long> {
     Optional<Usuaria> findByFirebaseUid(String firebaseUid);
+
+    Optional<Usuaria> findByEmailIgnoreCase(String email);
 }

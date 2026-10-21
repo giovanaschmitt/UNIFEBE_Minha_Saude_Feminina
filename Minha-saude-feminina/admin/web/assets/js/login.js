@@ -29,7 +29,8 @@ function alternarSenha() {
   campo.type = mostrando ? 'password' : 'text';
   const botao = document.getElementById('verSenha');
   botao.setAttribute('aria-label', mostrando ? 'Mostrar senha' : 'Ocultar senha');
-  botao.textContent = mostrando ? '👁' : '🙈';
+  botao.querySelector('.olho-aberto').classList.toggle('d-none', !mostrando);
+  botao.querySelector('.olho-fechado').classList.toggle('d-none', mostrando);
   campo.focus();
 }
 

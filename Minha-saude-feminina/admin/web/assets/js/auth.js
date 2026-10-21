@@ -6,10 +6,10 @@ const AUTH_CONFIG = {
   modo: 'firebase',
 
   firebase: {
-    apiKey: 'AIzaSyAtRom_V6WBVmW90dOiUJJNgdr3IgRmVNc',
-    authDomain: 'minhasaudefeminina-5f28c.firebaseapp.com',
-    projectId: 'minhasaudefeminina-5f28c',
-    appId: '',
+    apiKey: 'AIzaSyBNePgqhYI_wYeiVH3HM1jVEaWlUbx_66A',
+    authDomain: 'minha-saude-feminina.firebaseapp.com',
+    projectId: 'minha-saude-feminina',
+    appId: '1:821726155832:web:a5d580ced5331c653c02cd',
   },
 };
 
@@ -134,7 +134,13 @@ async function entrarComFirebase(email, senha) {
     throw new Error(traduzirErroFirebase(erro.code));
   }
 
-  const token = await credencial.user.getIdToken();
+  const resultadoToken = await credencial.user.getIdTokenResult(true);
+  if (resultadoToken.claims.admin !== true) {
+    await auth.signOut();
+    throw new Error('Esta conta não tem acesso à gestão de conteúdos.');
+  }
+
+  const token = resultadoToken.token;
   const sessao = {
     token,
     email: credencial.user.email,

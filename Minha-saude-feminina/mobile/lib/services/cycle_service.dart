@@ -1,13 +1,14 @@
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/cycle_record.dart';
+import 'api_client.dart';
 
 /// Serviço responsável por todo o ciclo de vida dos registros de ciclo
-/// menstrual: persistência local (SharedPreferences), cálculo de
+/// menstrual: sincronização com a API (/api/ciclos), cópia local por
+/// usuária (SharedPreferences, para abrir sem internet), cálculo de
 /// estatísticas e previsão do próximo ciclo.
 ///
 /// É um singleton simples com um [ValueNotifier] público, para que
@@ -17,7 +18,9 @@ class CycleService {
   CycleService._internal();
   static final CycleService instance = CycleService._internal();
 
-  static const String _storageKey = 'msf_cycle_records_v1';
+  /// Chave antiga, de quando os ciclos ficavam só no aparelho. Os registros
+  /// encontrados nela são enviados para a conta no primeiro login.
+  static const String _legacyStorageKey = 'msf_cycle_records_v1';
 
   /// Duração média padrão (usada apenas enquanto não há dados suficientes
   /// no histórico da usuária para calcular uma média real).
@@ -26,19 +29,64 @@ class CycleService {
 
   final ValueNotifier<List<CycleRecord>> recordsNotifier = ValueNotifier<List<CycleRecord>>([]);
 
-  bool _initialized = false;
+  final ApiClient _api = ApiClient.instance;
+
+  /// UID da usuária logada; os dados locais ficam separados por conta.
+  String? _uid;
 
   List<CycleRecord> get records => recordsNotifier.value;
 
-  /// Carrega os registros salvos localmente. Deve ser chamado uma vez,
-  /// idealmente antes do primeiro `runApp`.
-  Future<void> init() async {
-    if (_initialized) return;
-    _initialized = true;
-    await _load();
+  String get _storageKey => 'msf_cycle_records_v2_$_uid';
+
+  /// Chamado quando a usuária entra: mostra na hora a cópia local e, em
+  /// seguida, busca a versão atual na API.
+  Future<void> entrar(String uid) async {
+    if (_uid == uid) return;
+    _uid = uid;
+    await _loadCache();
+    try {
+      await sincronizar();
+    } catch (_) {
+      // Sem conexão: segue com a cópia local até a próxima sincronização.
+    }
   }
 
-  Future<void> _load() async {
+  /// Chamado ao sair da conta: limpa os dados da memória.
+  void sair() {
+    _uid = null;
+    recordsNotifier.value = [];
+  }
+
+  /// Envia registros antigos que só existiam no aparelho e baixa todos os
+  /// ciclos da conta.
+  Future<void> sincronizar() async {
+    if (_uid == null) return;
+    await _enviarRegistrosAntigos();
+    final dados = await _api.get('/ciclos') as List<dynamic>;
+    final list = dados.map((item) => CycleRecord.fromApi(item as Map<String, dynamic>)).toList()
+      ..sort((a, b) => b.startDate.compareTo(a.startDate));
+    recordsNotifier.value = list;
+    await _persist();
+  }
+
+  Future<void> _enviarRegistrosAntigos() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_legacyStorageKey);
+    if (raw == null || raw.isEmpty) return;
+    final antigos = (jsonDecode(raw) as List<dynamic>)
+        .map((item) => CycleRecord.fromJson(item as Map<String, dynamic>));
+    for (final registro in antigos) {
+      try {
+        await _api.post('/ciclos', registro.toApi());
+      } on ApiException catch (e) {
+        // 409: já existe um ciclo com essa data de início na conta.
+        if (e.status != 409) rethrow;
+      }
+    }
+    await prefs.remove(_legacyStorageKey);
+  }
+
+  Future<void> _loadCache() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final raw = prefs.getString(_storageKey);
@@ -59,26 +107,27 @@ class CycleService {
   }
 
   Future<void> _persist() async {
+    if (_uid == null) return;
     final prefs = await SharedPreferences.getInstance();
     final encoded = jsonEncode(records.map((r) => r.toJson()).toList());
     await prefs.setString(_storageKey, encoded);
   }
 
-  String _generateId() =>
-      '${DateTime.now().millisecondsSinceEpoch}_${Random().nextInt(99999)}';
-
   /// Registra o início (e, opcionalmente, o término) de um ciclo.
+  /// Lança [ApiException] se a API recusar ou estiver inacessível.
   Future<CycleRecord> addRecord({
     required DateTime startDate,
     DateTime? endDate,
     String? notes,
   }) async {
-    final record = CycleRecord(
-      id: _generateId(),
+    final novo = CycleRecord(
+      id: '',
       startDate: _dateOnly(startDate),
       endDate: endDate != null ? _dateOnly(endDate) : null,
       notes: notes,
     );
+    final dados = await _api.post('/ciclos', novo.toApi()) as Map<String, dynamic>;
+    final record = CycleRecord.fromApi(dados);
     final updated = [...records, record]
       ..sort((a, b) => b.startDate.compareTo(a.startDate));
     recordsNotifier.value = updated;
@@ -87,13 +136,16 @@ class CycleService {
   }
 
   Future<void> updateRecord(CycleRecord record) async {
-    final updated = records.map((r) => r.id == record.id ? record : r).toList()
+    final dados = await _api.put('/ciclos/${record.id}', record.toApi()) as Map<String, dynamic>;
+    final salvo = CycleRecord.fromApi(dados);
+    final updated = records.map((r) => r.id == salvo.id ? salvo : r).toList()
       ..sort((a, b) => b.startDate.compareTo(a.startDate));
     recordsNotifier.value = updated;
     await _persist();
   }
 
   Future<void> deleteRecord(String id) async {
+    await _api.delete('/ciclos/$id');
     final updated = records.where((r) => r.id != id).toList();
     recordsNotifier.value = updated;
     await _persist();

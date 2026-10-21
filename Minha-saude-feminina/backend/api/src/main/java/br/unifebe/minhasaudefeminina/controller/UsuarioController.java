@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.google.firebase.auth.FirebaseToken;
 
+import jakarta.validation.Valid;
+
 import br.unifebe.minhasaudefeminina.dto.CompletarPerfilRequest;
 import br.unifebe.minhasaudefeminina.model.Usuaria;
 import br.unifebe.minhasaudefeminina.service.UsuarioSyncService;
@@ -33,7 +35,7 @@ public class UsuarioController {
     @PutMapping("/me")
     public Usuaria completarPerfil(
             @AuthenticationPrincipal FirebaseToken token,
-            @RequestBody CompletarPerfilRequest dados) {
+            @RequestBody @Valid CompletarPerfilRequest dados) {
         return usuarioSyncService.completarPerfil(token, dados);
     }
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
@@ -34,16 +35,16 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/api/status").permitAll()
-                .requestMatchers("/api/categorias/**").permitAll()
-                .requestMatchers("/api/artigos/**").permitAll()
-                .requestMatchers("/api/midia/**").permitAll()
-                .requestMatchers("/api/sincronizacao").permitAll()
-                .requestMatchers("/midia/**").permitAll()
+                .requestMatchers(HttpMethod.GET,
+                        "/api/categorias/**", "/api/artigos/**", "/api/sincronizacao", "/midia/**").permitAll()
+                .requestMatchers("/api/categorias/**", "/api/artigos/**", "/api/midia/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .exceptionHandling(exception -> exception
                 .authenticationEntryPoint(authenticationEntryPoint)
+                .accessDeniedHandler(authenticationEntryPoint)
             )
             .addFilterBefore(new FirebaseTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 

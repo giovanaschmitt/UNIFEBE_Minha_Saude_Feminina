@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Acesso à API REST do back-end. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="frontend"
         android:name="${applicationName}"

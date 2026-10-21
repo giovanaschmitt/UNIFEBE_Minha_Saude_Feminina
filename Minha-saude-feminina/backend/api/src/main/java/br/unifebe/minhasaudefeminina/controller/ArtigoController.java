@@ -4,6 +4,8 @@ import br.unifebe.minhasaudefeminina.dto.ArtigoListaResponse;
 import br.unifebe.minhasaudefeminina.dto.ArtigoRequest;
 import br.unifebe.minhasaudefeminina.dto.ArtigoResponse;
 import br.unifebe.minhasaudefeminina.dto.PublicacaoRequest;
+import br.unifebe.minhasaudefeminina.exception.RecursoNaoEncontradoException;
+import br.unifebe.minhasaudefeminina.security.Acesso;
 import br.unifebe.minhasaudefeminina.service.ArtigoService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -38,12 +40,19 @@ public class ArtigoController {
             @RequestParam(required = false) String categoria,
             @RequestParam(required = false) String situacao,
             @RequestParam(required = false) Boolean publicado) {
+        if (!Acesso.ehAdmin()) {
+            return artigoService.listar(busca, categoria_id, categoria, "publicado", true);
+        }
         return artigoService.listar(busca, categoria_id, categoria, situacao, publicado);
     }
 
     @GetMapping("/{id}")
     public ArtigoResponse buscar(@PathVariable Long id) {
-        return artigoService.buscar(id);
+        ArtigoResponse artigo = artigoService.buscar(id);
+        if (!Acesso.ehAdmin() && !Boolean.TRUE.equals(artigo.publicado())) {
+            throw new RecursoNaoEncontradoException("Artigo não encontrado.");
+        }
+        return artigo;
     }
 
     @PostMapping

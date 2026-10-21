@@ -27,7 +27,7 @@ async function carregar() {
 
 function desenhar(categorias, contagem) {
   document.getElementById('previaChips').innerHTML =
-    ['<span class="chip ativo">✨ Todos</span>']
+    ['<span class="chip ativo">Todos</span>']
       .concat(categorias.map((c) => `<span class="chip">${c.emoji} ${escapar(c.nome)}</span>`))
       .join('');
 
@@ -35,7 +35,7 @@ function desenhar(categorias, contagem) {
     <tr>
       <td>
         <span class="me-2">${c.emoji}</span><strong>${escapar(c.nome)}</strong>
-        <span class="d-inline-block ms-2 align-middle" style="width:14px;height:14px;border-radius:50%;background:${escapar(c.cor)}"></span>
+        <span class="ponto-cor ms-2" style="background:${escapar(c.cor)}"></span>
         <div class="ajuda">${contagem[c.id] || 0} artigo(s)</div>
       </td>
       <td class="ajuda">${c.ordem}</td>

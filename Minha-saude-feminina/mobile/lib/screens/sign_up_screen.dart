@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import 'package:frontend/screens/home_screen.dart';
+import 'package:frontend/services/user_service.dart';
 
 const _authOutlineInputBorder = OutlineInputBorder(
   borderSide: BorderSide(color: Color(0xFF757575)),
@@ -45,12 +45,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
       if (name.isNotEmpty) {
         await cred.user?.updateDisplayName(name);
       }
+      // Cria o perfil no back-end (TB_USUARIA). Se a API estiver fora do ar,
+      // a conta continua válida: o perfil é criado no primeiro acesso à API.
+      try {
+        await UserService.instance.completarPerfil(nome: name.isEmpty ? null : name);
+      } catch (_) {}
       if (!mounted) return;
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-        (route) => false,
-      );
+      // Volta para a tela inicial, que já está mostrando a Home da conta nova.
+      Navigator.of(context).popUntil((route) => route.isFirst);
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
