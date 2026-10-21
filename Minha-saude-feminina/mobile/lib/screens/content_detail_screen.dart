@@ -1,19 +1,53 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 
-class DetalhesConteudoScreen extends StatelessWidget {
-  final String titulo;
-  final String categoria;
+import '../models/artigo.dart';
+import '../services/api_client.dart';
+import '../services/content_service.dart';
+
+class DetalhesConteudoScreen extends StatefulWidget {
+  /// Artigo vindo da listagem (sem o HTML); o conteúdo completo é buscado aqui.
+  final Artigo artigo;
+  final Color corCategoria;
 
   const DetalhesConteudoScreen({
     super.key,
-    required this.titulo,
-    required this.categoria,
+    required this.artigo,
+    required this.corCategoria,
   });
 
+  @override
+  State<DetalhesConteudoScreen> createState() => _DetalhesConteudoScreenState();
+}
+
+class _DetalhesConteudoScreenState extends State<DetalhesConteudoScreen> {
   static const Color corPrimariaVinho = Color(0xFFC43A4A);
   static const Color corRoxo = Color(0xFF5B2A86);
   static const Color corFundoRosa = Color(0xFFE3A4B6);
   static const Color corFundoBege = Color(0xFFF6F1EE);
+
+  Artigo? _completo;
+  String? _erro;
+
+  String get titulo => widget.artigo.titulo;
+  String get categoria => widget.artigo.categoria;
+
+  @override
+  void initState() {
+    super.initState();
+    _carregar();
+  }
+
+  Future<void> _carregar() async {
+    setState(() => _erro = null);
+    try {
+      final artigo = await ContentService.instance.buscarArtigo(widget.artigo.id);
+      if (mounted) setState(() => _completo = artigo);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _erro = e is ApiException ? e.mensagem : 'Não foi possível abrir este conteúdo.');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,36 +114,26 @@ class DetalhesConteudoScreen extends StatelessWidget {
                           boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 3))],
                         ),
                         child: Text(
-                          "🌸 $categoria",
-                          style: const TextStyle(
-                            color: corPrimariaVinho,
+                          "${widget.artigo.categoriaEmoji ?? '🌸'} $categoria",
+                          style: TextStyle(
+                            color: widget.corCategoria,
                             fontWeight: FontWeight.bold,
                             fontSize: 12.5,
                           ),
                         ),
                       ),
+                      const SizedBox(width: 10),
+                      Icon(Icons.schedule_rounded, size: 14, color: Colors.grey.shade500),
+                      const SizedBox(width: 4),
+                      Text(
+                        "${widget.artigo.tempoLeitura} min de leitura",
+                        style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 22),
 
-                  // Seção: O que é normal
-                  _buildSectionCard(
-                    emoji: "🌸",
-                    corIcone: corPrimariaVinho,
-                    tituloSecao: "O que é normal",
-                    conteudo:
-                        "O corrimento vaginal transparente ou esbranqueçado, sem cheiro forte, é completamente normal e faz parte da saúde íntima da mulher.",
-                  ),
-
-                  // Seção: Quando procurar a UBS
-                  _buildSectionCard(
-                    emoji: "🏥",
-                    corIcone: const Color(0xFFD9534F),
-                    tituloSecao: "Quando procurar a UBS",
-                    conteudo:
-                        "Procure a UBS se o corrimento tiver cor amarelada, esverdeada ou acinzentada, cheiro forte e desagradável.",
-                    corBorda: Colors.red.withOpacity(0.15),
-                  ),
+                  _buildConteudo(),
 
                   // Alerta
                   Container(
@@ -151,53 +175,69 @@ class DetalhesConteudoScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionCard({
-    required String emoji,
-    required Color corIcone,
-    required String tituloSecao,
-    required String conteudo,
-    Color? corBorda,
-  }) {
+  Widget _buildConteudo() {
+    final Widget filho;
+    if (_erro != null) {
+      filho = Column(
+        children: [
+          Text(_erro!, textAlign: TextAlign.center, style: TextStyle(color: Colors.grey.shade700)),
+          const SizedBox(height: 8),
+          TextButton(
+            onPressed: _carregar,
+            child: const Text(
+              'Tentar novamente',
+              style: TextStyle(color: corPrimariaVinho, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      );
+    } else if (_completo == null) {
+      filho = const Padding(
+        padding: EdgeInsets.symmetric(vertical: 24),
+        child: Center(child: CircularProgressIndicator(color: corPrimariaVinho)),
+      );
+    } else {
+      final artigo = _completo!;
+      filho = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (artigo.capaUrl != null && artigo.capaUrl!.isNotEmpty) ...[
+            ClipRRect(
+              borderRadius: BorderRadius.circular(14),
+              child: Image.network(
+                artigo.capaUrl!,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                errorBuilder: (context, erro, pilha) => const SizedBox.shrink(),
+              ),
+            ),
+            const SizedBox(height: 14),
+          ],
+          HtmlWidget(
+            artigo.conteudoHtml ?? '',
+            textStyle: TextStyle(color: Colors.grey.shade800, height: 1.55, fontSize: 14),
+          ),
+          if (artigo.autora.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            Text(
+              'Por ${artigo.autora}',
+              style: TextStyle(color: Colors.grey.shade500, fontSize: 12, fontStyle: FontStyle.italic),
+            ),
+          ],
+        ],
+      );
+    }
+
     return Container(
+      width: double.infinity,
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: corBorda != null ? Border.all(color: corBorda) : null,
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 12, offset: const Offset(0, 4))],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(color: corIcone.withOpacity(0.1), shape: BoxShape.circle),
-                alignment: Alignment.center,
-                child: Text(emoji, style: const TextStyle(fontSize: 17)),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  tituloSecao,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15.5,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            conteudo,
-            style: TextStyle(color: Colors.grey.shade700, height: 1.55, fontSize: 13.5),
-          ),
-        ],
-      ),
+      child: filho,
     );
   }
 }

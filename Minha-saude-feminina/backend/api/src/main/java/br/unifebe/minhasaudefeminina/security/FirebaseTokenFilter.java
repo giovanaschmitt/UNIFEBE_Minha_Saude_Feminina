@@ -1,9 +1,11 @@
 package br.unifebe.minhasaudefeminina.security;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.List;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -17,6 +19,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 public class FirebaseTokenFilter extends OncePerRequestFilter {
+
+    public static final String CLAIM_ADMIN = "admin";
+    public static final String PAPEL_ADMIN = "ROLE_ADMIN";
 
     @Override
     protected void doFilterInternal(
@@ -37,7 +42,7 @@ public class FirebaseTokenFilter extends OncePerRequestFilter {
             FirebaseToken decoded = FirebaseAuth.getInstance().verifyIdToken(token);
 
             UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(decoded, null, Collections.emptyList());
+                    new UsernamePasswordAuthenticationToken(decoded, null, papeis(decoded));
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             filterChain.doFilter(request, response);
@@ -46,5 +51,12 @@ public class FirebaseTokenFilter extends OncePerRequestFilter {
             SecurityContextHolder.clearContext();
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
         }
+    }
+
+    private static List<GrantedAuthority> papeis(FirebaseToken token) {
+        if (Boolean.TRUE.equals(token.getClaims().get(CLAIM_ADMIN))) {
+            return List.of(new SimpleGrantedAuthority(PAPEL_ADMIN));
+        }
+        return List.of();
     }
 }

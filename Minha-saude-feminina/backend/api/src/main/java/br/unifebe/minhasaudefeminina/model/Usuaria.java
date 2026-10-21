@@ -50,6 +50,11 @@ public class Usuaria {
         return firebaseUid;
     }
 
+    /** Liga o registro a uma nova conta Firebase com o mesmo e-mail. */
+    public void vincularFirebase(String firebaseUid) {
+        this.firebaseUid = firebaseUid;
+    }
+
     public String getNome() {
         return nome;
     }

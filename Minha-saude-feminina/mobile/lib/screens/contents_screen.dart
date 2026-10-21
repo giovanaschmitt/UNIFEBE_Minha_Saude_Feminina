@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:frontend/screens/content_detail_screen.dart';
 // 1. Importe o arquivo onde está a classe CustomNavigationWidgets
 import 'package:frontend/components/custom_navigation.dart';
+import 'package:frontend/models/artigo.dart';
+import 'package:frontend/services/api_client.dart';
+import 'package:frontend/services/content_service.dart';
 
 class ConteudosScreen extends StatefulWidget {
   const ConteudosScreen({super.key});
@@ -19,57 +22,62 @@ class _ConteudosScreenState extends State<ConteudosScreen> {
   String _filtroSelecionado = "Todos";
   String _termoBusca = "";
 
-  // --- DADOS (MANTIDOS EXATAMENTE COMO ESTAVAM) ---
-  final List<Map<String, String>> _todosConteudos = [
-    {
-      "emoji": "🩸",
-      "titulo": "Cólicas menstruais: quando se preocupar",
-      "descricao": "Saiba diferenciar cólicas normais de sinais médicos.",
-      "categoria": "Menstruação",
-      "tempo": "6 min",
-    },
-    {
-      "emoji": "✨",
-      "titulo": "Fase Folicular e Libido",
-      "descricao": "Entenda como seus hormônios afetam seu desejo.",
-      "categoria": "Menstruação",
-      "tempo": "4 min",
-    },
-    {
-      "emoji": "💊",
-      "titulo": "Tipos de Anticoncepcional",
-      "descricao": "Conheça as opções e como cada uma age no corpo.",
-      "categoria": "Contracepção",
-      "tempo": "8 min",
-    },
-    {
-      "emoji": "🤰",
-      "titulo": "Primeiros sinais de Gravidez",
-      "descricao": "O que o seu corpo sente nas primeiras semanas.",
-      "categoria": "Gravidez",
-      "tempo": "5 min",
-    },
-  ];
+  // --- DADOS (carregados da API: GET /api/artigos e /api/categorias) ---
+  List<Artigo> _todosConteudos = [];
+  List<Categoria> _categorias = [];
+  bool _carregando = true;
+  String? _erro;
 
-  List<Map<String, String>> _conteudosExibidos = [];
+  List<Artigo> _conteudosExibidos = [];
 
   @override
   void initState() {
     super.initState();
-    _conteudosExibidos = _todosConteudos;
+    _carregar();
   }
 
-  // --- LÓGICA (MANTIDA EXATAMENTE COMO ESTAVA) ---
+  Future<void> _carregar() async {
+    setState(() {
+      _carregando = true;
+      _erro = null;
+    });
+    try {
+      final resultados = await Future.wait([
+        ContentService.instance.listarArtigos(),
+        ContentService.instance.listarCategorias(),
+      ]);
+      if (!mounted) return;
+      _todosConteudos = resultados[0] as List<Artigo>;
+      _categorias = resultados[1] as List<Categoria>;
+      if (_filtroSelecionado != "Todos" && !_categorias.any((c) => c.nome == _filtroSelecionado)) {
+        _filtroSelecionado = "Todos";
+      }
+      _carregando = false;
+      _aplicarFiltros();
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _carregando = false;
+        _erro = e is ApiException ? e.mensagem : 'Não foi possível carregar os conteúdos.';
+      });
+    }
+  }
+
+  // --- LÓGICA ---
   void _aplicarFiltros() {
     setState(() {
+      final termo = _termoBusca.toLowerCase();
       _conteudosExibidos = _todosConteudos.where((item) {
-        final combinaBusca = item['titulo']!.toLowerCase().contains(_termoBusca.toLowerCase()) ||
-            item['categoria']!.toLowerCase().contains(_termoBusca.toLowerCase());
-        final combinaCategoria = _filtroSelecionado == "Todos" || item['categoria'] == _filtroSelecionado;
+        final combinaBusca = item.titulo.toLowerCase().contains(termo) ||
+            item.resumo.toLowerCase().contains(termo) ||
+            item.categoria.toLowerCase().contains(termo);
+        final combinaCategoria = _filtroSelecionado == "Todos" || item.categoria == _filtroSelecionado;
         return combinaBusca && combinaCategoria;
       }).toList();
     });
   }
+
+  Color _corDoArtigo(Artigo artigo) => artigo.categoriaCor ?? _corCategoria(artigo.categoria);
 
   Color _corCategoria(String categoria) {
     switch (categoria) {
@@ -106,23 +114,30 @@ class _ConteudosScreenState extends State<ConteudosScreen> {
             _buildFiltros(),
             const SizedBox(height: 4),
             Expanded(
-              child: _conteudosExibidos.isEmpty
-                  ? _buildEmptyState()
-                  : ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 110),
-                      itemCount: _conteudosExibidos.length,
-                      itemBuilder: (context, index) {
-                        final item = _conteudosExibidos[index];
-                        return _buildCardConteudo(
-                          context: context,
-                          emoji: item['emoji']!,
-                          titulo: item['titulo']!,
-                          descricao: item['descricao']!,
-                          categoria: item['categoria']!,
-                          tempoLeitura: item['tempo']!,
-                        );
-                      },
-                    ),
+              child: _carregando
+                  ? const Center(child: CircularProgressIndicator(color: corPrimariaVinho))
+                  : _erro != null
+                      ? _buildErrorState()
+                      : RefreshIndicator(
+                          color: corPrimariaVinho,
+                          onRefresh: _carregar,
+                          child: _conteudosExibidos.isEmpty
+                              ? ListView(
+                                  physics: const AlwaysScrollableScrollPhysics(),
+                                  children: [_buildEmptyState()],
+                                )
+                              : ListView.builder(
+                                  physics: const AlwaysScrollableScrollPhysics(),
+                                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 110),
+                                  itemCount: _conteudosExibidos.length,
+                                  itemBuilder: (context, index) {
+                                    return _buildCardConteudo(
+                                      context: context,
+                                      artigo: _conteudosExibidos[index],
+                                    );
+                                  },
+                                ),
+                        ),
             ),
           ],
         ),
@@ -209,9 +224,7 @@ class _ConteudosScreenState extends State<ConteudosScreen> {
   Widget _buildFiltros() {
     final filtros = [
       {"label": "Todos", "emoji": "✨"},
-      {"label": "Menstruação", "emoji": "🩸"},
-      {"label": "Contracepção", "emoji": "💊"},
-      {"label": "Gravidez", "emoji": "🤰"},
+      for (final categoria in _categorias) {"label": categoria.nome, "emoji": categoria.emoji},
     ];
 
     return SizedBox(
@@ -262,13 +275,14 @@ class _ConteudosScreenState extends State<ConteudosScreen> {
 
   Widget _buildCardConteudo({
     required BuildContext context,
-    required String emoji,
-    required String titulo,
-    required String descricao,
-    required String tempoLeitura,
-    required String categoria,
+    required Artigo artigo,
   }) {
-    final corCategoria = _corCategoria(categoria);
+    final corCategoria = _corDoArtigo(artigo);
+    final emoji = artigo.emoji;
+    final titulo = artigo.titulo;
+    final descricao = artigo.resumo;
+    final categoria = artigo.categoria;
+    final tempoLeitura = "${artigo.tempoLeitura} min";
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
@@ -286,7 +300,7 @@ class _ConteudosScreenState extends State<ConteudosScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => DetalhesConteudoScreen(titulo: titulo, categoria: categoria),
+                builder: (context) => DetalhesConteudoScreen(artigo: artigo, corCategoria: corCategoria),
               ),
             );
           },
@@ -349,6 +363,45 @@ class _ConteudosScreenState extends State<ConteudosScreen> {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(color: corPrimariaVinho.withOpacity(0.1), shape: BoxShape.circle),
+              child: const Icon(Icons.cloud_off_rounded, color: corPrimariaVinho, size: 34),
+            ),
+            const SizedBox(height: 18),
+            const Text(
+              "Não foi possível carregar",
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              _erro ?? '',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 12.5, color: Colors.grey.shade600),
+            ),
+            const SizedBox(height: 16),
+            TextButton.icon(
+              onPressed: _carregar,
+              icon: const Icon(Icons.refresh_rounded, color: corPrimariaVinho),
+              label: const Text(
+                "Tentar novamente",
+                style: TextStyle(color: corPrimariaVinho, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
         ),
       ),
     );

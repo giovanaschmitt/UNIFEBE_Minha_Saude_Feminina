@@ -3,14 +3,81 @@ import 'package:flutter/material.dart';
 
 import '../components/custom_navigation.dart';
 import '../models/cycle_record.dart';
+import '../models/perfil.dart';
+import '../services/api_client.dart';
 import '../services/cycle_service.dart';
+import '../services/notification_service.dart';
+import '../services/user_service.dart';
+import '../utils/date_format_utils.dart';
+import 'edit_profile_screen.dart';
+import 'symptom_history_screen.dart';
 
-/// Tela de Perfil: mostra os dados da conta autenticada (via Firebase
-/// Auth, já existente no app), um resumo dos registros de ciclo salvos
-/// localmente e a opção de sair da conta. Não cria nenhuma conexão
-/// nova — só lê informações que o app já tinha disponíveis.
-class ProfileScreen extends StatelessWidget {
+/// Tela de Perfil: dados pessoais (API /usuarios/me), resumo dos ciclos,
+/// histórico de sintomas, notificações e saída da conta.
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  Perfil? _perfil;
+  bool _carregandoPerfil = true;
+  String? _erroPerfil;
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarPerfil();
+  }
+
+  Future<void> _carregarPerfil() async {
+    setState(() {
+      _carregandoPerfil = true;
+      _erroPerfil = null;
+    });
+    try {
+      final perfil = await UserService.instance.meuPerfil();
+      if (mounted) setState(() => _perfil = perfil);
+    } catch (e) {
+      if (mounted) {
+        setState(() => _erroPerfil = e is ApiException ? e.mensagem : 'Não foi possível carregar seus dados.');
+      }
+    } finally {
+      if (mounted) setState(() => _carregandoPerfil = false);
+    }
+  }
+
+  Future<void> _editarPerfil() async {
+    final salvo = await Navigator.push<Perfil>(
+      context,
+      MaterialPageRoute(builder: (_) => EditProfileScreen(perfil: _perfil)),
+    );
+    if (salvo != null && mounted) setState(() => _perfil = salvo);
+  }
+
+  Future<void> _alternarLembrete(bool ativo) async {
+    try {
+      await NotificationService.instance.definirLembreteCiclo(ativo);
+    } catch (e) {
+      _avisar(e is ApiException ? e.mensagem : 'Não foi possível alterar as notificações.');
+    }
+  }
+
+  Future<void> _enviarTeste() async {
+    try {
+      await NotificationService.instance.enviarTeste();
+      _avisar('Notificação de teste enviada. Ela chega em alguns segundos.');
+    } catch (e) {
+      _avisar(e is ApiException ? e.mensagem : 'Não foi possível enviar o teste.');
+    }
+  }
+
+  void _avisar(String mensagem) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(mensagem)));
+  }
 
   static const Color corPrimaria = Color(0xFFC43A4A);
   static const Color corRoxo = Color(0xFF5B2A86);
@@ -50,7 +117,7 @@ class ProfileScreen extends StatelessWidget {
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
         title: const Text('Sair da conta'),
-        content: const Text('Tem certeza que deseja sair? Seus registros de ciclo continuam salvos neste aparelho.'),
+        content: const Text('Tem certeza que deseja sair? Seus registros continuam salvos na sua conta.'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancelar')),
           TextButton(
@@ -61,9 +128,11 @@ class ProfileScreen extends StatelessWidget {
       ),
     );
     if (confirm == true) {
+      await NotificationService.instance.sair();
       await FirebaseAuth.instance.signOut();
-      // O StreamBuilder em main.dart já redireciona para a tela de
-      // login automaticamente assim que o estado de autenticação muda.
+      CycleService.instance.sair();
+      // O StreamBuilder em main.dart mostra o login; fecha as telas abertas por cima.
+      if (context.mounted) Navigator.of(context).popUntil((route) => route.isFirst);
     }
   }
 
@@ -92,9 +161,29 @@ class ProfileScreen extends StatelessWidget {
                     const SizedBox(height: 18),
                     _buildHeaderCard(user),
                     const SizedBox(height: 22),
+                    Row(
+                      children: [
+                        const Expanded(
+                          child: Text('Seus dados', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                        ),
+                        if (_perfil != null)
+                          TextButton.icon(
+                            onPressed: _editarPerfil,
+                            icon: const Icon(Icons.edit_outlined, size: 16, color: corPrimaria),
+                            label: const Text('Editar', style: TextStyle(color: corPrimaria)),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    _buildPersonalSection(),
+                    const SizedBox(height: 22),
                     const Text('Seus dados de ciclo', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 10),
                     _buildCycleStats(),
+                    const SizedBox(height: 22),
+                    const Text('Registros e lembretes', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 10),
+                    _buildRecordsSection(),
                     const SizedBox(height: 22),
                     const Text('Conta', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 10),
@@ -175,6 +264,152 @@ class ProfileScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildPersonalSection() {
+    if (_carregandoPerfil) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 16),
+        child: Center(child: CircularProgressIndicator(color: corPrimaria)),
+      );
+    }
+    final perfil = _perfil;
+    if (perfil == null) {
+      return _card(
+        child: Column(
+          children: [
+            Text(_erroPerfil ?? '', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey.shade700)),
+            TextButton(
+              onPressed: _carregarPerfil,
+              child: const Text('Tentar novamente', style: TextStyle(color: corPrimaria)),
+            ),
+          ],
+        ),
+      );
+    }
+    return Column(
+      children: [
+        if (perfil.incompleto)
+          Container(
+            margin: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: corRoxo.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: corRoxo.withValues(alpha: 0.18)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.info_outline_rounded, color: corRoxo),
+                const SizedBox(width: 10),
+                const Expanded(
+                  child: Text(
+                    'Complete seu perfil para receber orientações da sua fase da vida.',
+                    style: TextStyle(fontSize: 12.5, color: corRoxo, fontWeight: FontWeight.w500),
+                  ),
+                ),
+                TextButton(
+                  onPressed: _editarPerfil,
+                  child: const Text('Completar', style: TextStyle(color: corRoxo, fontWeight: FontWeight.bold)),
+                ),
+              ],
+            ),
+          ),
+        _card(
+          child: Column(
+            children: [
+              _accountRow(
+                icon: Icons.person_outline,
+                iconColor: corPrimaria,
+                title: 'Nome',
+                subtitle: (perfil.nome ?? '').isEmpty ? 'não informado' : perfil.nome!,
+              ),
+              _divider(),
+              _accountRow(
+                icon: Icons.cake_outlined,
+                iconColor: corPrimaria,
+                title: 'Nascimento',
+                subtitle: perfil.dataNascimento == null
+                    ? 'não informado'
+                    : '${DateFormatUtils.long(perfil.dataNascimento!)} (${perfil.idade} anos)',
+              ),
+              _divider(),
+              _accountRow(
+                icon: Icons.spa_outlined,
+                iconColor: corPrimaria,
+                title: 'Fase da vida',
+                subtitle: perfil.faseVidaRotulo ?? 'não informada',
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRecordsSection() {
+    return _card(
+      child: Column(
+        children: [
+          InkWell(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const SymptomHistoryScreen()),
+            ),
+            child: _accountRow(
+              icon: Icons.healing_outlined,
+              iconColor: corRoxo,
+              title: 'Histórico de sintomas',
+              subtitle: 'Ver e excluir sintomas registrados',
+              showChevron: true,
+            ),
+          ),
+          _divider(),
+          ValueListenableBuilder<bool>(
+            valueListenable: NotificationService.instance.lembreteCiclo,
+            builder: (context, ativo, _) => SwitchListTile(
+              value: ativo,
+              onChanged: _alternarLembrete,
+              activeThumbColor: corPrimaria,
+              secondary: Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(color: corRoxo.withValues(alpha: 0.1), shape: BoxShape.circle),
+                child: const Icon(Icons.notifications_outlined, color: corRoxo, size: 18),
+              ),
+              title: const Text('Lembretes do ciclo', style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600)),
+              subtitle: Text('Aviso 2 dias antes e no dia previsto',
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+            ),
+          ),
+          _divider(),
+          InkWell(
+            borderRadius: const BorderRadius.vertical(bottom: Radius.circular(18)),
+            onTap: _enviarTeste,
+            child: _accountRow(
+              icon: Icons.send_outlined,
+              iconColor: corRoxo,
+              title: 'Testar notificação',
+              subtitle: 'Enviar um aviso de teste para este celular',
+              showChevron: true,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _card({required Widget child}) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 10, offset: const Offset(0, 3))],
+      ),
+      child: child,
     );
   }
 

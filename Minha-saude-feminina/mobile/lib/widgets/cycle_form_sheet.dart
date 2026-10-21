@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/cycle_record.dart';
+import '../services/api_client.dart';
 import '../services/cycle_service.dart';
 import '../utils/date_format_utils.dart';
 
@@ -127,6 +128,10 @@ class _CycleFormSheetState extends State<CycleFormSheet> {
         );
       }
       if (mounted) Navigator.of(context).pop();
+    } catch (e) {
+      if (mounted) {
+        setState(() => _errorText = e is ApiException ? e.mensagem : 'Não foi possível salvar o ciclo.');
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -148,8 +153,20 @@ class _CycleFormSheetState extends State<CycleFormSheet> {
       ),
     );
     if (confirm == true) {
-      await CycleService.instance.deleteRecord(widget.existing!.id);
-      if (mounted) Navigator.of(context).pop();
+      setState(() {
+        _saving = true;
+        _errorText = null;
+      });
+      try {
+        await CycleService.instance.deleteRecord(widget.existing!.id);
+        if (mounted) Navigator.of(context).pop();
+      } catch (e) {
+        if (mounted) {
+          setState(() => _errorText = e is ApiException ? e.mensagem : 'Não foi possível excluir o ciclo.');
+        }
+      } finally {
+        if (mounted) setState(() => _saving = false);
+      }
     }
   }
 

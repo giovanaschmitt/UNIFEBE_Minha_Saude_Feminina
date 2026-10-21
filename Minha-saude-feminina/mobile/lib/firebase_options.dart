@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -50,22 +47,27 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAtRom_V6WBVmW90dOiUJJNgdr3IgRmVNc',
-    appId: '1:398017566208:android:efa2d179021a177a45aae5',
-    messagingSenderId: '398017566208',
-    projectId: 'minhasaudefeminina-5f28c',
-    storageBucket: 'minhasaudefeminina-5f28c.firebasestorage.app',
+    apiKey: 'AIzaSyCNHGg4YvI3HzzDMj53Xz0Es76IxYhvLgU',
+    appId: '1:821726155832:android:acd0c8203c4f8c403c02cd',
+    messagingSenderId: '821726155832',
+    projectId: 'minha-saude-feminina',
+    storageBucket: 'minha-saude-feminina.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDa5LxyyhXKx5br-VPMqv5-A_VsBS97pXk',
-    appId: '1:398017566208:ios:57d0816a7d3483c245aae5',
-    messagingSenderId: '398017566208',
-    projectId: 'minhasaudefeminina-5f28c',
-    storageBucket: 'minhasaudefeminina-5f28c.firebasestorage.app',
-    androidClientId: '398017566208-5botji0v7bprfr2ndg01tot4tbre2h95.apps.googleusercontent.com',
-    iosClientId: '398017566208-3ldpttchb91bbjpgou8c8nsm9on5gq83.apps.googleusercontent.com',
-    iosBundleId: 'com.example.frontend',
+    apiKey: 'AIzaSyAK0FVf-oYNwkxjh9u09vZetjlYQp_pUxg',
+    appId: '1:821726155832:ios:a6dba7d9cff13cc73c02cd',
+    messagingSenderId: '821726155832',
+    projectId: 'minha-saude-feminina',
+    storageBucket: 'minha-saude-feminina.firebasestorage.app',
+    iosClientId: '821726155832-anhlss09r08a4dkjkuni48amvan8sjnb.apps.googleusercontent.com',
+    iosBundleId: 'br.edu.unifebe.minhasaudefeminina',
   );
-
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyBNePgqhYI_wYeiVH3HM1jVEaWlUbx_66A',
+    appId: '1:821726155832:web:a5d580ced5331c653c02cd',
+    messagingSenderId: '821726155832',
+    projectId: 'minha-saude-feminina',
+    authDomain: 'minha-saude-feminina.firebaseapp.com',
+    storageBucket: 'minha-saude-feminina.firebasestorage.app',
+  );
 }

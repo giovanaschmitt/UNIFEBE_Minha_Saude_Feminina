@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-import 'package:frontend/screens/home_screen.dart';
 import 'package:frontend/screens/sign_up_screen.dart';
 
 class SignInScreen extends StatelessWidget {
@@ -95,11 +94,7 @@ class _SignInFormState extends State<SignInForm> {
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
-      if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-      );
+      // A tela inicial (main.dart) acompanha o login e abre a Home sozinha.
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -304,11 +299,7 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
       }
       final credential = GoogleAuthProvider.credential(idToken: idToken);
       await FirebaseAuth.instance.signInWithCredential(credential);
-      if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-      );
+      // A tela inicial (main.dart) acompanha o login e abre a Home sozinha.
     } on GoogleSignInException catch (e) {
       if (!mounted) return;
       if (e.code == GoogleSignInExceptionCode.canceled) return;

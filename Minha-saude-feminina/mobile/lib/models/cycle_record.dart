@@ -48,6 +48,26 @@ class CycleRecord {
         'notes': notes,
       };
 
+  /// Corpo enviado para POST/PUT /api/ciclos.
+  Map<String, dynamic> toApi() => {
+        'data_inicio': _apiDate(startDate),
+        'data_fim': endDate == null ? null : _apiDate(endDate!),
+        'observacao': notes,
+      };
+
+  /// Ciclo como vem da API (/api/ciclos).
+  factory CycleRecord.fromApi(Map<String, dynamic> json) {
+    return CycleRecord(
+      id: json['id'].toString(),
+      startDate: DateTime.parse(json['data_inicio'] as String),
+      endDate: json['data_fim'] != null ? DateTime.parse(json['data_fim'] as String) : null,
+      notes: json['observacao'] as String?,
+    );
+  }
+
+  static String _apiDate(DateTime d) =>
+      '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
   factory CycleRecord.fromJson(Map<String, dynamic> json) {
     return CycleRecord(
       id: json['id'] as String,

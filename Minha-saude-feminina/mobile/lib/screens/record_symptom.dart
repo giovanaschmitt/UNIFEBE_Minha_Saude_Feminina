@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../services/api_client.dart';
+import '../services/symptom_service.dart';
+import 'symptom_history_screen.dart';
+
 class RecordSymptomScreen extends StatefulWidget {
   const RecordSymptomScreen({super.key});
 
@@ -20,6 +24,7 @@ class _RecordSymptomScreenState extends State<RecordSymptomScreen> {
   // Controladores de estado
   int? _indiceSelecionado;
   String? _intensidadeSelecionada;
+  bool _salvando = false;
 
   // Sintomas com ícones do Material Design (sem emojis) e uma cor por
   // categoria: tons de vinho para sintomas físicos, tons de roxo para
@@ -51,13 +56,32 @@ class _RecordSymptomScreenState extends State<RecordSymptomScreen> {
     }
   }
 
-  void _salvarSintoma() {
+  Future<void> _salvarSintoma() async {
+    if (_salvando) return;
     final sintoma = _sintomas[_indiceSelecionado!];
+    final intensidade = _intensidadeSelecionada!;
 
-    // Lógica de salvamento (mock, mantida como estava).
+    setState(() => _salvando = true);
+    try {
+      await SymptomService.instance.registrar(
+        sintoma: sintoma['label'] as String,
+        intensidade: intensidade,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _salvando = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e is ApiException ? e.mensagem : 'Não foi possível registrar o sintoma.'),
+        ),
+      );
+      return;
+    }
+    if (!mounted) return;
+
     _mostrarConfirmacao(
       label: sintoma['label'] as String,
-      intensidade: _intensidadeSelecionada!,
+      intensidade: intensidade,
       icone: sintoma['icon'] as IconData,
       cor: sintoma['cor'] as Color,
     );
@@ -195,6 +219,14 @@ class _RecordSymptomScreenState extends State<RecordSymptomScreen> {
             ],
           ),
         ),
+        IconButton(
+          tooltip: 'Histórico de sintomas',
+          icon: const Icon(Icons.history_rounded, color: corPrimaria),
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const SymptomHistoryScreen()),
+          ),
+        ),
       ],
     );
   }
@@ -287,16 +319,23 @@ class _RecordSymptomScreenState extends State<RecordSymptomScreen> {
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed: _salvarSintoma,
+                onPressed: _salvando ? null : _salvarSintoma,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _corIntensidade(_intensidadeSelecionada!),
+                  disabledBackgroundColor: _corIntensidade(_intensidadeSelecionada!),
                   elevation: 0,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
-                child: const Text(
-                  "Salvar sintoma",
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14.5),
-                ),
+                child: _salvando
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.4),
+                      )
+                    : const Text(
+                        "Salvar sintoma",
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14.5),
+                      ),
               ),
             ),
           ],

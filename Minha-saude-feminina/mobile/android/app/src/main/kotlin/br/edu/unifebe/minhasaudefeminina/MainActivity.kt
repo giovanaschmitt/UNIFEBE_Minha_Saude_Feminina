@@ -1,4 +1,4 @@
-package com.example.frontend
+package br.edu.unifebe.minhasaudefeminina
 
 import io.flutter.embedding.android.FlutterActivity
 

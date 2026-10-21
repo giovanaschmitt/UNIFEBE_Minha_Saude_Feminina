@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/home_screen.dart'; // Importante para o botão Home
 import 'package:frontend/screens/contents_screen.dart';
 import 'package:frontend/screens/record_symptom.dart';
 import 'package:frontend/screens/cycle_screen.dart';
@@ -31,15 +30,11 @@ class CustomNavigationWidgets {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          // HOME: Volta para o início e limpa tudo
+          // HOME: volta para a primeira tela (a Home da conta logada, em main.dart)
           IconButton(
             icon: const Icon(Icons.home_outlined),
             color: activeTab == 'home' ? corPrimaria : Colors.grey,
-            onPressed: () => Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => const HomeScreen()),
-              (route) => false,
-            ),
+            onPressed: () => Navigator.of(context).popUntil((route) => route.isFirst),
           ),
           // CALENDÁRIO / CICLO MENSTRUAL
           IconButton(

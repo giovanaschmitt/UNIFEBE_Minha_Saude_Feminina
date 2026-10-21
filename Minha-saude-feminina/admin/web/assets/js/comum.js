@@ -13,15 +13,21 @@ function montarCabecalho(telaAtual) {
   const sessao = temAuth ? Auth.sessao() : null;
  
   document.getElementById('cabecalho').innerHTML = `
-    <div class="container py-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
-      <a class="marca d-flex align-items-center gap-2" href="index.html">Minha Saúde Feminina <span>💜</span></a>
-      <nav class="d-flex align-items-center gap-1 flex-wrap">
-        ${itens.map((i) => `<a class="nav-link ${i.id === telaAtual ? 'ativo' : ''}" href="${i.href}">${i.rotulo}</a>`).join('')}
-        <div class="usuario">
-          <button class="btn btn-sair" type="button" id="botaoSair" title="Encerrar a sessão">
-            <span aria-hidden="true">⏻</span> Sair
-          </button>
+    <div class="container py-2 d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <a class="marca" href="index.html">
+        <img class="marca-icone" src="assets/favicon.svg" alt="">
+        Minha Saúde Feminina
+      </a>
+      <nav class="d-flex align-items-center flex-wrap">
+        <div class="segmentos">
+          ${itens.map((i) => `<a class="nav-link ${i.id === telaAtual ? 'ativo' : ''}" href="${i.href}"${i.id === telaAtual ? ' aria-current="page"' : ''}>${i.rotulo}</a>`).join('')}
         </div>
+        <button class="btn-sair" type="button" id="botaoSair" title="Encerrar a sessão">
+          <svg class="icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 17l-5-5 5-5"/><path d="M5 12h11"/>
+          </svg>
+          Sair
+        </button>
       </nav>
     </div>`;
  

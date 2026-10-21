@@ -47,6 +47,9 @@ dependencies:
   # registro do ciclo menstrual.
   flutter_localizations:
     sdk: flutter
+  http: ^1.6.0
+  flutter_widget_from_html_core: ^0.17.4
+  firebase_messaging: ^16.7.0
 
 dev_dependencies:
   flutter_test:
