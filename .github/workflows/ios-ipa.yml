@@ -1,0 +1,41 @@
+# Gera o .ipa do app (iPhone) num Mac do GitHub Actions.
+# O arquivo sai SEM assinatura da Apple: para instalar num iPhone é preciso
+# assinar com um Apple ID (ex.: Sideloadly/AltStore) ou com conta Apple Developer.
+# Rodar: aba Actions do GitHub → "Gerar IPA (iOS)" → Run workflow.
+
+name: Gerar IPA (iOS)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  ipa:
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: Minha-saude-feminina/mobile
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Dependências
+        run: flutter pub get
+
+      - name: Build iOS (sem assinatura)
+        run: flutter build ios --release --no-codesign --dart-define=API_BASE_URL=https://appcurricularizacao.dev.br/api
+
+      - name: Empacotar .ipa
+        run: |
+          mkdir -p Payload
+          cp -R build/ios/iphoneos/Runner.app Payload/
+          zip -qr MinhaSaudeFeminina.ipa Payload
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MinhaSaudeFeminina-ipa
+          path: Minha-saude-feminina/mobile/MinhaSaudeFeminina.ipa

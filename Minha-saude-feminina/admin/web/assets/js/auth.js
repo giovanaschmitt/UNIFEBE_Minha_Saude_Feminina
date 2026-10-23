@@ -46,6 +46,25 @@ const Auth = {
     return this.sessao()?.token ?? null;
   },
 
+  /**
+   * Token para chamar a API. No modo Firebase o ID token dura 1 hora; o SDK
+   * mantém a sessão no navegador e devolve um token renovado quando preciso.
+   */
+  async tokenValido() {
+    if (AUTH_CONFIG.modo !== 'firebase' || !this.autenticado()) return this.token();
+    try {
+      const auth = await obterAuthFirebase();
+      await auth.authStateReady();
+      if (!auth.currentUser) return null;
+      const token = await auth.currentUser.getIdToken();
+      if (token !== this.token()) this.guardar({ ...this.sessao(), token });
+      return token;
+    } catch {
+      // Sem acesso ao SDK (ex.: offline): tenta com o token guardado.
+      return this.token();
+    }
+  },
+
   autenticado() {
     return Boolean(this.token());
   },
@@ -54,9 +73,12 @@ const Auth = {
     Guardado.gravar(CHAVE_SESSAO, JSON.stringify(sessao));
   },
 
-  sair() {
+  async sair(motivo) {
     Guardado.apagar(CHAVE_SESSAO);
-    location.href = 'login.html';
+    if (AUTH_CONFIG.modo === 'firebase') {
+      try { await (await obterAuthFirebase()).signOut(); } catch {}
+    }
+    location.href = motivo ? `login.html?motivo=${encodeURIComponent(motivo)}` : 'login.html';
   },
 
   exigirSessao() {
@@ -113,19 +135,25 @@ async function entrarComApi(email, senha) {
 
 /* --------------------------------------------------------------- Firebase --- */
 
-let appFirebase = null;
+const FIREBASE_SDK = 'https://www.gstatic.com/firebasejs/10.13.2';
+let authFirebase = null;
+
+/** Instância do Firebase Auth, carregada uma vez por página. */
+async function obterAuthFirebase() {
+  if (authFirebase) return authFirebase;
+  const { initializeApp } = await import(`${FIREBASE_SDK}/firebase-app.js`);
+  const { getAuth } = await import(`${FIREBASE_SDK}/firebase-auth.js`);
+  authFirebase = getAuth(initializeApp(AUTH_CONFIG.firebase));
+  return authFirebase;
+}
 
 async function entrarComFirebase(email, senha) {
   if (!AUTH_CONFIG.firebase.apiKey) {
     throw new Error('Configure AUTH_CONFIG.firebase em assets/js/auth.js antes de usar o modo Firebase.');
   }
 
-  const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js');
-  const { getAuth, signInWithEmailAndPassword } =
-    await import('https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js');
-
-  appFirebase = appFirebase || initializeApp(AUTH_CONFIG.firebase);
-  const auth = getAuth(appFirebase);
+  const auth = await obterAuthFirebase();
+  const { signInWithEmailAndPassword } = await import(`${FIREBASE_SDK}/firebase-auth.js`);
 
   let credencial;
   try {

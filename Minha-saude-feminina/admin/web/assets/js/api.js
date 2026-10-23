@@ -37,7 +37,7 @@ async function requisitar(caminho, opcoes = {}) {
   const url = `${API_CONFIG.base}${caminho}`;
 
   const cabecalhos = opcoes.corpoBruto ? {} : { 'Content-Type': 'application/json' };
-  const token = typeof Auth !== 'undefined' ? Auth.token() : null;
+  const token = typeof Auth !== 'undefined' ? await Auth.tokenValido() : null;
   if (token) cabecalhos.Authorization = `Bearer ${token}`;
 
   let resposta;
@@ -57,6 +57,11 @@ async function requisitar(caminho, opcoes = {}) {
     } catch {
       dados = { erro: texto };
     }
+  }
+
+  if (resposta.status === 401 && token && typeof Auth !== 'undefined') {
+    // Sessão encerrada ou não renovável: volta para o login em vez de mostrar erros soltos.
+    await Auth.sair('expirada');
   }
 
   if (!resposta.ok) {

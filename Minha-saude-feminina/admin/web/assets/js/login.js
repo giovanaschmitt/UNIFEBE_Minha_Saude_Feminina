@@ -14,6 +14,10 @@ document.addEventListener('DOMContentLoaded', () => {
     firebase: 'Autenticando pelo Firebase.',
   }[AUTH_CONFIG.modo] || '';
 
+  if (parametroUrl('motivo') === 'expirada') {
+    avisar('Sua sessão terminou. Entre novamente para continuar.', 'erro');
+  }
+
   document.getElementById('verSenha').onclick = alternarSenha;
   document.getElementById('formLogin').addEventListener('submit', entrar);
 });
