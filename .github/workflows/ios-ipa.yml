@@ -23,8 +23,12 @@ jobs:
           channel: stable
           cache: true
 
+      # Todos os plugins do app suportam Swift Package Manager; sem CocoaPods.
       - name: Dependências
-        run: flutter pub get
+        run: |
+          flutter config --enable-swift-package-manager
+          rm -f ios/Podfile ios/Podfile.lock
+          flutter pub get
 
       - name: Build iOS (sem assinatura)
         run: flutter build ios --release --no-codesign --dart-define=API_BASE_URL=https://appcurricularizacao.dev.br/api
