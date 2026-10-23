@@ -15,7 +15,11 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        String local = "file:" + Path.of(diretorio).toAbsolutePath() + "/";
+        // toUri() codifica espaços, parênteses e barras do Windows; "file:" + caminho cru quebra nesses casos.
+        String local = Path.of(diretorio).toAbsolutePath().toUri().toString();
+        if (!local.endsWith("/")) {
+            local += "/";
+        }
         registry.addResourceHandler("/midia/**").addResourceLocations(local);
     }
 }

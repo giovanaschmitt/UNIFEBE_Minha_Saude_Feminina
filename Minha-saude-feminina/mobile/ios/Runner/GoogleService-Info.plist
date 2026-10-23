@@ -3,23 +3,23 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>398017566208-3ldpttchb91bbjpgou8c8nsm9on5gq83.apps.googleusercontent.com</string>
+	<string>821726155832-anhlss09r08a4dkjkuni48amvan8sjnb.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.398017566208-3ldpttchb91bbjpgou8c8nsm9on5gq83</string>
+	<string>com.googleusercontent.apps.821726155832-anhlss09r08a4dkjkuni48amvan8sjnb</string>
 	<key>ANDROID_CLIENT_ID</key>
-	<string>398017566208-5botji0v7bprfr2ndg01tot4tbre2h95.apps.googleusercontent.com</string>
+	<string>821726155832-k11cl9ghgbpfkorbhao76nqttshbhno8.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
-	<string>AIzaSyDa5LxyyhXKx5br-VPMqv5-A_VsBS97pXk</string>
+	<string>AIzaSyAK0FVf-oYNwkxjh9u09vZetjlYQp_pUxg</string>
 	<key>GCM_SENDER_ID</key>
-	<string>398017566208</string>
+	<string>821726155832</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.example.frontend</string>
+	<string>br.edu.unifebe.minhasaudefeminina</string>
 	<key>PROJECT_ID</key>
-	<string>minhasaudefeminina-5f28c</string>
+	<string>minha-saude-feminina</string>
 	<key>STORAGE_BUCKET</key>
-	<string>minhasaudefeminina-5f28c.firebasestorage.app</string>
+	<string>minha-saude-feminina.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -31,6 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:398017566208:ios:57d0816a7d3483c245aae5</string>
+	<string>1:821726155832:ios:a6dba7d9cff13cc73c02cd</string>
 </dict>
 </plist>

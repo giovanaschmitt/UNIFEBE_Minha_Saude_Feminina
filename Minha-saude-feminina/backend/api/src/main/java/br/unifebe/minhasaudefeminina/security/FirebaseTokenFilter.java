@@ -49,7 +49,12 @@ public class FirebaseTokenFilter extends OncePerRequestFilter {
         } catch (FirebaseAuthException e) {
             System.out.println("Falha ao validar token Firebase: " + e.getAuthErrorCode() + " - " + e.getMessage());
             SecurityContextHolder.clearContext();
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
+            // Responde direto (sem sendError), senão o Spring troca o motivo por "Full authentication is required".
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            String motivo = (e.getAuthErrorCode() + ": " + e.getMessage()).replace("\\", "\\\\").replace("\"", "\\\"");
+            response.getWriter().write("{\"erro\":\"Token do Firebase recusado pela API (" + motivo + ")\"}");
         }
     }
 
